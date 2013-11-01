@@ -1,0 +1,80 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+	<title>Fullscreener - with CSS3</title>
+	<link rel="stylesheet" href="../src/fullscreener.css" />
+		
+	<style>
+		
+		* { padding: 0; margin: 0; outline: 0; }
+
+		html,
+		body { height: 100%; }
+		img { border: 0; vertical-align: middle; }
+
+		.bg { position: relative; overflow: hidden; height: 500px; }
+		.fsr-container { background-position: center top; }
+
+		.actions { padding: 20px; }
+
+	</style>
+
+	<script src="../lib/jquery-1.10.2.min.js"></script>
+	<script src="../src/jquery.fullscreener.js"></script>
+
+	<script>
+
+		(function($){
+
+			$(document).ready(function(){
+
+				var $bg = $('.bg'),
+					$img = $bg.find('img'),
+					$initBtn = $('.js-init'),
+					$resizeBtn = $('.js-resize'),
+					$destroyBtn = $('.js-destroy');
+
+				$img.fullscreener({
+					useCSS: false
+				});
+
+				$initBtn.on('click', function(){
+
+					$img.fullscreener({
+						useCSS: false
+					});
+
+				});
+
+				$resizeBtn.on('click', function(){
+
+					$bg.css('height', $bg.height() + 50);
+					$img.fullscreener('resize');
+
+				});
+
+				$destroyBtn.on('click', function(){
+
+					$img.fullscreener('destroy');
+
+				});
+
+			});
+
+		})(jQuery);
+
+	</script>
+</head>
+<body>
+<div class="bg">
+	<img src="image.jpg" width="1920" height="1200" alt="" />
+</div><!-- /.bg -->
+
+<div class="actions">
+	<button class="js-init">Initialize</button>
+	<button class="js-resize">Resize</button>
+	<button class="js-destroy">Destroy</button>
+</div><!-- /.actions -->
+</body>
+</html>
