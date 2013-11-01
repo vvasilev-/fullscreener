@@ -72,7 +72,7 @@ Controls how often performs resizing the image in case of window.resize or windo
 
 ###resize###
 
-Manually resize the picture.
+Manually resize the image.
 ```
 $('.fullscreen img').fullscreener('resize');
 ```
