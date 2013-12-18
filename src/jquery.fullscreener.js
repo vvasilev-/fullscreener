@@ -82,6 +82,9 @@
 
 		}
 
+		// generate unique id
+		this.instanceId = this.uuid();
+
 		// call init method
 		this.init();
 
@@ -121,7 +124,7 @@
 		// save reference to constructor
 		var _this = this;
 
-		$win.on('resize.fullscreener orientationchange.fullscreener', this.throttle(function(){
+		$win.on('resize.'+ _this.instanceId +' orientationchange.' + _this.instanceId, this.throttle(function(){
 
 			_this.resize();
 
@@ -326,6 +329,13 @@
 	};
 
 	/**
+	 * @method uuid
+	 */
+	Fullscreener.fn.uuid = function(){
+		return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+	}
+
+	/**
 	 * @method destroy
 	 */
 	Fullscreener.fn.destroy = function(){
@@ -333,6 +343,8 @@
 		this.$element.removeClass(cssClasses.hidden).removeClass(cssClasses.element).removeAttr('style');
 		this.$container.removeClass(cssClasses.container).removeAttr('style');
 		this.$element.removeData('fullscreener');
+
+		$win.off('resize.'+ this.instanceId +' orientationchange.' + this.instanceId);
 
 	};
 
