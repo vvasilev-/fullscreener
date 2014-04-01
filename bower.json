@@ -2,7 +2,7 @@
     "name": "fullscreener",
     "version": "1.0.0",
     "homepage": "https://github.com/vvasilev-/fullscreener",
-    "description": "Easy fullscreen backgrounds.",
+    "description": "Easy fullscreen backgrounds with jQuery.",
     "main": "src/jquery.fullscreener.js",
     "keywords": [
         "jquery",
@@ -13,7 +13,7 @@
         "image"
     ],
     "license": "MIT",
-    "private": true,
+    "private": false,
     "ignore": [
         "**/.*",
         "node_modules",
