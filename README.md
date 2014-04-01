@@ -1,9 +1,5 @@
 #jQuery Fullscreener#
 
-A simple plugin for fullscreen backgrounds.
-
-Based on fullscreener plugin by [Nikola Boychev](https://github.com/NBoychev "NBoychev"). 
-
 ##How to use?##
 
 1. Include the plugin files and jQuery library into your document:
