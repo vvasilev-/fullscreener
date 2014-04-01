@@ -62,7 +62,7 @@ describe('jQuery Fullscreener', function(){
 			useCSS: false
 		});
 
-		expect( $img.data('fullscreener').params.ratios.element != null ).toBeTruthy();
+		expect( $img.data('fullscreener').params.ratios.image != null ).toBeTruthy();
 		expect( $img.data('fullscreener').params.ratios.container != null ).toBeTruthy();
 
 	});

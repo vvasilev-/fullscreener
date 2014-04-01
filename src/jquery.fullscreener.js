@@ -1,29 +1,33 @@
-/**
- * @name jQuery Fullscreener
- * @license MIT 
- * @version 1.0
- */
-!(function(window, document, $, undefined){
+;(function(factory) {
+	if (typeof define === 'function' && define.amd) {
+		define(['jquery'], factory);
+	} else {
+		factory(jQuery);
+	}
+}(function($) {
+
+	'use strict';
 
 	/**
-	 * plugin variables
+	 * Variables.
+	 * @type {Mixed}
 	 */
-	var $win = $(window),
-		$doc = $(document),
-		cssClasses = {
-			container: 'fsr-container',
-			element: 'fsr-element',
-			hidden: 'fsr-hidden'
-		},
-		Fullscreener, defaults, supportBgSize;
+	var $doc    = $(document);
+	var $win    = $(window);
+	var classes = {
+		container: 'fsr-container',
+		image    : 'fsr-image',
+		hidden   : 'fsr-hidden'
+	};
 
 	/**
-	 * plugin defaults
+	 * Default settings.
+	 * @type {Object}
 	 */
-	defaults = {
-		useCSS: true,
+	var defaults = {
+		useCSS   : true,
 		container: 'parent',
-		position: {
+		position : {
 			x: 'center',
 			y: 'center'
 		},
@@ -31,361 +35,361 @@
 	};
 
 	/**
-	 * check background size support
+	 * Check background-size support.
+	 * @type {Boolean}
 	 */
-	supportBgSize = 'backgroundSize' in document.createElement('div').style;
+	var backgroundSize = 'backgroundSize' in document.createElement('div').style;
 
 	/**
+	 * Creates a new instance.
 	 * @constructor
-	 * @param {jQuery Object} element 
-	 * @param {Object} options 
+	 * @param  {DOM Element} image   
+	 * @param  {Object}      options 
+	 * @return {void} 
 	 */
-	Fullscreener = function(element, options){
+	var Fullscreener = function(image, options) {
 
-		// save reference to element
-		this.element = element;
-		this.$element = $(element);
+		this.image  = image;
+		this.$image = $(image);
 
-		// extend defaults
 		this.settings = $.extend({}, defaults, options);
-
-		// create params
-		this.params = {
-			element: {
-				width: null,
+		this.params   = {
+			image: {
+				width : null,
 				height: null
 			},
 			container: {
-				width: null,
+				width : null,
 				height: null
 			},
 			ratios: {
-				container: null,
-				element: null
+				image    : null,
+				container: null
 			}
 		};
 
-		// save reference to container
-		if (this.settings.container == 'parent') {
-			this.$container = this.$element.parent();
+		if (this.settings.container === 'parent') {
+			this.$container = this.$image.parent();
+		} else if (this.settings.container instanceof jQuery && this.settings.container.length) {
+			this.$container = this.settings.container;
 		} else {
-			if (this.settings.container instanceof jQuery && this.settings.container.length) {
-				this.$container = this.settings.container;
-			}
-		}
-
-		// throw error for missing container
-		if (!this.$container.length) {
-
-			this.notify('The container was not found!');
+			this.log('The container is missing.');
 			return;
-
 		}
 
-		// generate unique id
-		this.instanceId = this.uuid();
+		this.id = this.uuid();
 
-		// call init method
 		this.init();
 
-	};
-
-	Fullscreener.fn = Fullscreener.prototype;
-	Fullscreener.fn.constructor = Fullscreener;
+	}
 
 	/**
-	 * @method init
+	 * Shortcut to prototype.
 	 */
-	Fullscreener.fn.init = function(){
+	Fullscreener.fn = Fullscreener.prototype;
 
-		// add class to element
-		this.$element.addClass(cssClasses.element);
-		this.$container.addClass(cssClasses.container);
+	/**
+	 * Initializes the plugin's logic.
+	 * @return {void} 
+	 */
+	Fullscreener.fn.init = function() {
 
-		// set image as background and use background size
-		if (supportBgSize && this.settings.useCSS) {
+		// add classes to elements
+		this.$image.addClass(classes.image);
+		this.$container.addClass(classes.container);
+
+		// determine method
+		if (backgroundSize && this.settings.useCSS) {
 			this.setBackground();
+		} else if (!backgroundSize || !this.settings.useCSS) {
+			this.listen();
+			this.resize();
 		} else {
-			if (!supportBgSize || !this.settings.useCSS) {
-
-				this.listen();
-				this.resize();
-				
-			}
+			this.log('No resize method.');
+			return;
 		}
 
-	};
+	}
 
 	/**
-	 * @method listen
+	 * Set image as background.
+	 * @return {void} 
 	 */
-	Fullscreener.fn.listen = function(){
+	Fullscreener.fn.setBackground = function() {
 
-		// save reference to constructor
+		var $image     = this.$image;
+		var $container = this.$container;
+		var pos        = this.settings.position;
+
+		// hide image 
+		$image.addClass(classes.hidden);
+
+		// set image as background for container
+		$container.css({
+			'background-image'   : 'url(' + $image[0].src + ')',
+			'background-position': pos.x + ' ' + pos.y
+		});
+
+	}
+
+	/**
+	 * Adds event listeners for resize & orientationchange.
+	 * @return {void} 
+	 */
+	Fullscreener.fn.listen = function() {
+
 		var _this = this;
 
-		$win.on('resize.'+ _this.instanceId +' orientationchange.' + _this.instanceId, this.throttle(function(){
-
-			_this.resize();
-
-		}, this.settings.throttleTimeout));
-
-	};
-
-	/**
-	 * @method setBackground
-	 */
-	Fullscreener.fn.setBackground = function(){
-
-		// shortcuts
-		var $element = this.$element,
-			$container = this.$container;
-
-		// update classes
-		$element.addClass(cssClasses.hidden);
-
-		// update container background
-		$container.css('background-image', 'url(' + $element[0].src + ')');
+		$win.on('resize.' + this.id + ' orientationchange.' + this.id, this.throttle(function() {
+				_this.resize();
+			},
+			this.settings.throttleTimeout)
+		);
 
 	};
 
 	/**
-	 * @method calcRatios
+	 * Resizes the image.
+	 * @return {void} 
 	 */
-	Fullscreener.fn.calcRatios = function(){
+	Fullscreener.fn.resize = function() {
+		this.calcRatios();
+		this.update();
+	}
 
-		// shortcuts
-		var $element = this.$element,
-			$container = this.$container,
-			params = this.params;
+	/**
+	 * Calculates the image and container ratio.
+	 * @return {void} 
+	 */
+	Fullscreener.fn.calcRatios = function() {
 
-		if (!params.ratios.element) {
+		var $image     = this.$image;
+		var $container = this.$container;
+		var params     = this.params;
 
-			// check for width & height attributes
-			if (!$element.attr('width') || !$element.attr('height')) {
+		var imageWidth, imageHeight, containerWidth, containerHeight;
 
-				this.notify('The image should have width/height attributes!');
+		// calc the image ratio only once
+		if (!params.ratios.image) {
+
+			// width & height attributes check
+			if (!$image.attr('width') || !$image.attr('height')) {
+				this.log('The image should have width/height attributes.');
 				return;
-
 			}
 
-			// dimensions
-			var elementWidth = parseInt($element.attr('width'), 10),
-				elementHeight = parseInt($element.attr('height'), 10);
+			imageWidth  = parseInt($image.attr('width'), 10);
+			imageHeight = parseInt($image.attr('height'), 10);
 
-			// calculate
-			params.ratios.element = elementHeight/elementWidth;
-
-			params.element.width = elementWidth;
-			params.element.height = elementHeight;
-
-		} 
-
-		// dimensions
-		var containerWidth = $container.width(),
-			containerHeight = $container.height();
-
-		// calculate
-		params.ratios.container = containerHeight/containerWidth;
-
-		params.container.width = containerWidth;
-		params.container.height = containerHeight;
-
-	};
-
-	/**
-	 * @method update
-	 */
-	Fullscreener.fn.update = function(){
-
-		// shortcuts
-		var $element = this.$element,
-			params = this.params,
-			settings = this.settings,
-			props = {
-				width: 0,
-				height: 0,
-				top: 'auto',
-				right: 'auto',
-				bottom: 'auto',
-				left: 'auto'
-			};
-
-		// calculate dimensions
-		if (params.ratios.element < params.ratios.container) {
-
-			props.height = params.container.height;
-			props.width = params.container.height / params.ratios.element;
-
-		} else {
-
-			props.height = params.container.width * params.ratios.element;
-			props.width = params.container.width;
+			params.ratios.image = imageHeight/imageWidth;
+			params.image.width  = imageWidth;
+			params.image.height = imageHeight;
 
 		}
 
-		// calculate position
-		switch (settings.position.y) {
+		containerWidth  = $container.width();
+		containerHeight = $container.height();
 
-			case 'top':
+		params.ratios.container = containerHeight/containerWidth;
+		params.container.width  = containerWidth;
+		params.container.height = containerHeight;
+
+	}
+
+	/**
+	 * Updates the image position when useCSS is false or background-size is not supported.
+	 * @return {void} 
+	 */
+	Fullscreener.fn.update = function() {
+
+		var $image        = this.$image;
+		var ratios        = this.params.ratios;
+		var containerDims = this.params.container;
+		var config        = this.settings;
+		var props         = {
+			width : 0,
+			height: 0,
+			top   : 'auto',
+			right : 'auto',
+			bottom: 'auto',
+			left  : 'auto'
+		};
+
+		// calc the image dimensions
+		if (ratios.image < ratios.container) {
+			props.width  = containerDims.height / ratios.image;
+			props.height = containerDims.height;
+		} else {
+			props.width  = containerDims.width;
+			props.height = containerDims.width * ratios.image; 
+		}
+
+		// calc the image position
+		switch (config.position.y) {
+			case 'top': 
 				props.top = 0;
 			break;
 
-			case 'bottom': 
+			case 'bottom':
 				props.bottom = 0;
 			break;
 
-			case 'center': 
-			default:
-				props.top = (params.container.height - props.height)/2;
+			case 'center':
+				props.top = (containerDims.height - props.height) / 2;
 			break;
 
+			default: 
+				this.log('The vertical position cannot be calculated.');
+				return;
 		}
 
-		switch (settings.position.x) {
-
+		switch (config.position.x) {
 			case 'left':
 				props.left = 0;
 			break;
 
-			case 'right': 
+			case 'right':
 				props.right = 0;
 			break;
 
-			case 'center': 
-			default:
-				props.left = (params.container.width - props.width)/2;
+			case 'center':
+				props.left = (containerDims.width - props.width) / 2;
 			break;
 
+			default: 
+				this.log('The horizontal position cannot be calculated.');
+				return;
 		}
 
-		// update css properties 
-		$element.css(props);
+		$image.css(props);
 
-	};
+	}
 
 	/**
-	 * @method throttle
-	 * @param {Function} func 
-	 * @param {Number} wait 
-	 * @param {Object} options 
+	 * Destroys the plugin instance.
+	 * @return {void}
 	 */
-	Fullscreener.fn.throttle = function (func, wait, options){
+	Fullscreener.fn.destroy = function() {
+
+		var $image     = this.$image;
+		var $container = this.$container;
+
+		// remove classes
+		$image
+			.removeClass(classes.hidden)
+			.removeClass(classes.image)
+			.removeAttr('style');
+
+		$container
+			.removeClass(classes.container)
+			.removeAttr('style');
+
+		// remove all event listeners
+		$win.off('resize.' + this.id + ' orientationchange.' + this.id);
+
+		// remove plugin data
+		$image.removeData('fullscreener');
+
+	}
+
+	/**
+	 * Returns a function, that, when invoked, will only be triggered at most once during a given window of time. 
+	 * Normally, the throttled function will run as much as it can, without ever going more than once per `wait` duration; 
+	 * but if you'd like to disable the execution on the leading edge, 
+	 * pass `{leading: false}`. To disable execution on the trailing edge, ditto.
+	 * @param  {Function} func    
+	 * @param  {Number}   wait    
+	 * @param  {Object}   options 
+	 * @return {Function}         
+	 */
+	Fullscreener.fn.throttle = function(func, wait, options) {
+
+		var timeout  = null;
+		var previous = 0;
+		var options  = options || {};
 
 		var context, args, result;
-		var timeout = null,
-			previous = 0;
 
-		options || (options = {});
-
-		function later(){
-
+		function later() {
 			previous = options.leading == false ? 0 : new Date;
-			timeout = null;
-			result = func.apply(context, args);
+			timeout  = null;
+			result   = func.apply(context, args);
+		}
 
-		};
-
-		return function(){
+		return function() {
 
 			var now = new Date;
+			var remaining;
 
 			if (!previous && options.leading == false) {
 				previous = now;
 			}
 
-			var remaining = wait - (now - previous);
-
-			context = this;
-			args = arguments;
+			remaining = wait - (now - previous);
+			context   = this;
+			args      = arguments;
 
 			if (remaining <= 0) {
-
 				clearTimeout(timeout);
-				timeout = null;
-				previous = now;
-				result = func.apply(context, args);
 
+				timeout  = null;
+				previous = now;
+				result   = func.apply(context, args);
 			} else {
-				if (!timeout && options.trailing != false) {
+				if (!timeout && options.leading != false) {
 					timeout = setTimeout(later, remaining);
 				}
 			}
 
 			return result;
 
-		};
+		}
 
-	};
-
-	/**
-	 * @method resize
-	 */
-	Fullscreener.fn.resize = function(){
-
-		this.calcRatios();
-		this.update();
-
-	};
-
-	/**
-	 * @method uuid
-	 */
-	Fullscreener.fn.uuid = function(){
-		return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 	}
 
 	/**
-	 * @method destroy
+	 * Generates an unique id.
+	 * @return {String} 
 	 */
-	Fullscreener.fn.destroy = function(){
-
-		this.$element.removeClass(cssClasses.hidden).removeClass(cssClasses.element).removeAttr('style');
-		this.$container.removeClass(cssClasses.container).removeAttr('style');
-		this.$element.removeData('fullscreener');
-
-		$win.off('resize.'+ this.instanceId +' orientationchange.' + this.instanceId);
-
-	};
+	Fullscreener.fn.uuid = function() {
+		return 'fsr' + parseInt(new Date().getTime() / 1000, 10);
+	}
 
 	/**
-	 * @method notify
-	 * @param {String} message 
+	 * Used for error notifications.
+	 * @param  {String} message 
+	 * @return {void}         
 	 */
-	Fullscreener.fn.notify = function(message){
-		alert('Fullscreener: ' + message);
-	};
+	Fullscreener.fn.log = function(message) {
+		alert('Fullscreener ' + message);
+	}
 
 	/**
-	 * @extends jQuery.fn
+	 * Register the plugin.
 	 * @param {Object|String} args 
+	 * @return {jQuery Object} 
 	 */
-	$.fn.fullscreener = function(args){
+	$.fn.fullscreener = function(args) {
 
-		return this.each(function(){
+		return this.each(function() {
 
-			// save reference to the element and plugin instance
-			var $this = $(this),
-				instance = $this.data('fullscreener');
+			var $image   = $(this);
+			var instance = $image.data('fullscreener');
 
 			if (!instance) {
-				$this.data('fullscreener', new Fullscreener(this, args));
+				$image.data('fullscreener', new Fullscreener(this, args));
 			} else {
-
-				if (typeof args == 'string') {
-
+				if (typeof args === 'string') {
 					if (instance[args]) {
 						instance[args]()
 					} else {
-						Fullscreener.fn.notify('This is not a valid method!');
+						Fullscreener.fn.log('No valid method.');
 					}
-
 				}
-
 			}
 
 		});
 
-	};
+	}
 
-})(window, document, jQuery);
+}));

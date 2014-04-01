@@ -1,30 +1,34 @@
 module.exports = function(grunt){
 
-	// grunt tasks
+	// tasks
 	grunt.loadNpmTasks('grunt-contrib-uglify');
-	grunt.loadNpmTasks('grunt-contrib-copy');
+	grunt.loadNpmTasks('grunt-zipup');
 
-	// grunt config
+	// config
 	grunt.initConfig({
+		packageInfo: grunt.file.readJSON('bower.json'),
 		uglify: {
-			build: {
+			main: {
 				files: { 
-					'build/jquery.fullscreener.min.js': ['src/jquery.fullscreener.js']
+					'src/jquery.fullscreener.min.js': ['src/jquery.fullscreener.js']
 				}
 			}
 		},
-		copy: {
+		zipup: {
 			main: {
-				expand: true,
-				cwd: 'src/',
-				src: '**.css',
-				dest: 'build/',
-				filter: 'isFile'
+				appName: '<%= packageInfo.name %>',
+				version: '<%= packageInfo.version %>',
+				outDir: 'build',
+				files: [
+					{ src: 'src/jquery.fullscreener.min.js' },
+					{ src: 'src/jquery.fullscreener.css' }
+				],
+				template: '{{appName}}-{{version}}.zip'
 			}
 		}
 	});
 
 	// custom tasks
-	grunt.registerTask('build', ['uglify:build', 'copy'])
+	grunt.registerTask('build', ['uglify:main', 'zipup:main'])
 
 };
