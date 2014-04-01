@@ -1,0 +1,34 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+	<title>Fullscreener - with CSS3</title>
+	<link rel="stylesheet" href="files/fullscreener.css" />
+		
+	<style>
+		* { padding: 0; margin: 0; outline: 0; }
+
+		html,
+		body { height: 100%; }
+		img { border: 0; vertical-align: middle; }
+
+		.bg { position: relative; min-height: 100%; }
+	</style>
+
+	<script src="files/jquery-1.11.0.min.js"></script>
+	<script src="files/jquery.fullscreener.min.js"></script>
+
+	<script>
+		(function($){
+			$(document).ready(function(){
+				$('.bg img').fullscreener();
+			});
+		})(jQuery);
+	</script>
+</head>
+<body>
+<div class="bg">
+	<img src="files/image.jpg" width="1920" height="1200" alt="" />
+</div><!-- /.bg -->
+</body>
+</html>
