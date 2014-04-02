@@ -20,8 +20,8 @@ module.exports = function(grunt){
 				version: '<%= packageInfo.version %>',
 				outDir: 'build',
 				files: [
-					{ src: 'src/jquery.fullscreener.min.js' },
-					{ src: 'src/jquery.fullscreener.css' }
+					{ src: 'src/jquery.fullscreener.min.js', dest: '/jquery.fullscreener.min.js' },
+					{ src: 'src/jquery.fullscreener.css', dest: '/jquery.fullscreener.css' }
 				],
 				template: '{{appName}}-{{version}}.zip'
 			}
