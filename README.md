@@ -1,11 +1,13 @@
 #jQuery Fullscreener#
 
+[Demos](http://vvasilev-.github.io/fullscreener/)
+
 ##How to use?##
 
 1. Include the plugin files and jQuery library into your document:
 
     ```
-    <link rel="stylesheet" href="fullscreener.css" />
+    <link rel="stylesheet" href="jquery.fullscreener.css" />
     <script src="jquery-1.10.2.min.js"></script>
     <script src="jquery.fullscreener.min.js"></script>
     ```
