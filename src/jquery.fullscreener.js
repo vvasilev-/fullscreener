@@ -377,7 +377,9 @@
 			var instance = $image.data('fullscreener');
 
 			if (!instance) {
-				$image.data('fullscreener', new Fullscreener(this, args));
+				if (typeof args !== 'string') {
+					$image.data('fullscreener', new Fullscreener(this, args));
+				}
 			} else {
 				if (typeof args === 'string') {
 					if (instance[args]) {

@@ -1,6 +1,6 @@
 {
     "name": "fullscreener",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "homepage": "https://github.com/vvasilev-/fullscreener",
     "description": "Easy fullscreen backgrounds with jQuery.",
     "main": "src/jquery.fullscreener.js",
